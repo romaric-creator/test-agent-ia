@@ -1,7 +1,14 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { User } = require('../../models'); // Path to models/index.js is correct if this file is in backend/src/services
-const saltRounds = 10; // Number of salt rounds for bcrypt
+const saltRounds = 10;
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  console.warn('Warning: JWT_SECRET environment variable is not set. Using a fallback secret key. This is not secure for production.');
+  // In a real application, you might throw an error or implement a more robust fallback strategy
+}
 
 const registerUser = async (username, email, password) => {
   // Enhanced Validation
@@ -41,7 +48,7 @@ const registerUser = async (username, email, password) => {
   // Generate JWT
   const token = jwt.sign(
     { id: newUser.id, username: newUser.username, email: newUser.email },
-    process.env.JWT_SECRET || 'fallback_secret_key_for_development_only', // Use environment variable in production
+    JWT_SECRET || 'fallback_secret_key_for_development_only',
     { expiresIn: '1h' }
   );
 
@@ -64,7 +71,7 @@ const loginUser = async (email, password) => {
   // Generate JWT
   const token = jwt.sign(
     { id: user.id, username: user.username, email: user.email },
-    process.env.JWT_SECRET || 'fallback_secret_key_for_development_only', // Use environment variable in production
+    JWT_SECRET || 'fallback_secret_key_for_development_only',
     { expiresIn: '1h' }
   );
 
