@@ -1,18 +1,31 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { User } = require('../../models'); // Adjust path if models are in a different structure
+const { User } = require('../../models'); // Path to models/index.js is correct if this file is in backend/src/services
 const saltRounds = 10; // Number of salt rounds for bcrypt
 
 const registerUser = async (username, email, password) => {
-  // Basic validation (can be enhanced)
+  // Enhanced Validation
   if (!username || !email || !password) {
-    throw new Error('Missing required fields for registration');
+    throw new Error('All fields (username, email, password) are required.');
+  }
+  if (password.length < 6) {
+    throw new Error('Password must be at least 6 characters long.');
+  }
+  // Basic email format check (can be further enhanced with regex or libraries)
+  if (!/\S+@\S+\.\S+/.test(email)) {
+    throw new Error('Invalid email format.');
   }
 
-  // Check if user already exists
-  const existingUser = await User.findOne({ where: { email } });
-  if (existingUser) {
-    throw new Error('Email already in use');
+  // Check if email already exists
+  const existingUserByEmail = await User.findOne({ where: { email } });
+  if (existingUserByEmail) {
+    throw new Error('Email already in use.');
+  }
+
+  // Check if username already exists
+  const existingUserByUsername = await User.findOne({ where: { username } });
+  if (existingUserByUsername) {
+    throw new Error('Username already in use.');
   }
 
   // Hash password
@@ -39,13 +52,13 @@ const loginUser = async (email, password) => {
   // Find user by email
   const user = await User.findOne({ where: { email } });
   if (!user) {
-    throw new Error('Invalid credentials');
+    throw new Error('Invalid credentials.'); // Generic error for security
   }
 
   // Compare password
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw new Error('Invalid credentials');
+    throw new Error('Invalid credentials.'); // Generic error for security
   }
 
   // Generate JWT
