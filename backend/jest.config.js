@@ -13,4 +13,7 @@ module.exports = {
   transformIgnorePatterns: [
     '/node_modules/(?!(sequelize-test-helpers|chai)/)'
   ],
+  transform: {
+    '^.+\.jsx?$': 'babel-jest', // Use babel-jest to transform .js and .jsx files
+  },
 };
